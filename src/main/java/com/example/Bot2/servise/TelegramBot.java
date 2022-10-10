@@ -36,8 +36,8 @@ public class TelegramBot extends TelegramLongPollingBot  {
         return config.getToken();
     }
 
-    HashMap<Long, String > preLibrary = new HashMap<>();
-    HashMap<String, List<Message> > library = new HashMap<>();
+    HashMap<Long, String > preLibrary = new HashMap<>(); // перша мапа
+    HashMap<String, List<Message> > library = new HashMap<>(); // головна мапа
     SendMessage message = new SendMessage();
     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
     String nameOfFolder;
@@ -88,6 +88,7 @@ public class TelegramBot extends TelegramLongPollingBot  {
 
 
     }
+    //Надсилання будь-якого повідомлення
     private void sendObject(Long chatId, List messageToSand) {
         message.setChatId(chatId);
         message.setEntities(messageToSand);
@@ -97,6 +98,7 @@ public class TelegramBot extends TelegramLongPollingBot  {
 
         }
     }
+    //надсилання текстового повідомлення
     private void sendMsg(Long chatId, String textToSend) {
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
@@ -107,7 +109,7 @@ public class TelegramBot extends TelegramLongPollingBot  {
 
         }
     }
-
+    //головна клавіатура
     private ReplyKeyboardMarkup getMainMenu() {
 
         KeyboardRow row1 = new KeyboardRow();
@@ -121,6 +123,7 @@ public class TelegramBot extends TelegramLongPollingBot  {
 
         return replyKeyboardMarkup;
     }
+
     private ReplyKeyboardMarkup getSaveMenu() {
 
         KeyboardRow row1 = new KeyboardRow();
@@ -130,15 +133,17 @@ public class TelegramBot extends TelegramLongPollingBot  {
         replyKeyboardMarkup.setKeyboard(rows);
         return replyKeyboardMarkup;
     }
-
+    //запис у першу мапу. потрібно для того, щоб по chatId отримати kay для другої мапи
     public void preLibrarian(Long chatId, Message message) {
         preLibrary.put(chatId,message.getText());
     }
+    // запис у другу головну мапу
     public void librarian(Long chatId,Message message) {
 
         String kay = preLibrary.get(chatId);
         library.put(kay, (List<Message>) message);
     }
+    // пошук об'єктів, повертає список обєктів
     public List<Message> findObject(String message){
         return  library.get(message);
     }
