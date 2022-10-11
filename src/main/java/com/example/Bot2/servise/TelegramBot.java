@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.MessageEntity;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -18,6 +19,7 @@ import java.util.List;
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
     final BotConfig config;
+
 
     public TelegramBot(BotConfig config) {
         this.config = config;
@@ -33,77 +35,85 @@ public class TelegramBot extends TelegramLongPollingBot {
         return config.getToken();
     }
 
-    HashMap<Long, String> preLibrary = new HashMap<>(); // перша мапа
+    List<String> folder = new ArrayList<>();
+    List<Message> result = new ArrayList<>();
     HashMap<String, List<Message>> library = new HashMap<>(); // головна мапа
+
+
+    String nameOfFolder;
+    Message someMessage;
     SendMessage message = new SendMessage();
     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
 
-
-
-
     @Override
     public void onUpdateReceived(Update update) {
+
         if (update.hasMessage() && update.getMessage().hasText()) {
+            SendMessage message = new SendMessage();
+
             Message updateMessage = update.getMessage();
             long chatId = update.getMessage().getChatId();
             String name = update.getMessage().getChat().getFirstName();
 
-
-
             switch (updateMessage.getText()) {
                 case "/start":
+                    message.setReplyMarkup(getMainMenu());
                     startCommandReceived(chatId, name);
+
                     break;
                 case "Зберегти до бібліотеки":
                     sendMsg(chatId, "Назва папки в яку зберегти:");
 
                     break;
                 case "Що зберегти (файл, ссилка, фото...)":
-                    librarian(chatId, updateMessage);
-                    sendObject(chatId, findObject(updateMessage.getText())); // перевірка
                     break;
-                case "Що шукаєш?":
-                    sendObject(chatId, findObject(updateMessage.getText()));
+                case "Знайти":
                     break;
                 default:
-                    preLibrarian(chatId, updateMessage);
-                   sendMsg(chatId,preFindObject(chatId));
-                    message.setReplyMarkup(getSaveMenu());
+                    if (updateMessage.hasText()) {
+                        preLibrarian(updateMessage);
+                        message.setReplyMarkup(getSaveMenu());
 
+                    } else if (updateMessage.hasAnimation() || updateMessage.hasAudio() ||
+                            updateMessage.hasContact() || updateMessage.hasDocument() || updateMessage.hasPhoto()
+                            || updateMessage.hasVideo() || updateMessage.hasVoice()) {
 
+                        librarian(updateMessage);
+                        findObject(chatId,result);
+                    }
             }
-
         }
-
-
     }
-
-
 
     private void startCommandReceived(Long chatId, String name) {
 
         String answer = "Hi, " + name + ", nice to meet you!";
         sendMsg(chatId, answer);
-
-
     }
 
     //Надсилання списку
-    private void sendObject(Long chatId, List messageToSand) {
-        message.setChatId(chatId);
-        message.setEntities(messageToSand);
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
+    private void sendObject(Long chatId, List<String> messageToSand) {
 
+        int a = messageToSand.size();
+        for (int i = 0; i != a; i++) {
+            message.setChatId(chatId);
+            message.setText(messageToSand.get(i));
+            try {
+                execute(message);
+            } catch (TelegramApiException e) {
+
+            }
         }
+
+
     }
 
     //надсилання текстового повідомлення
     private void sendMsg(Long chatId, String textToSend) {
+
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
-        message.setReplyMarkup(getMainMenu());
+
         try {
             execute(message);
         } catch (TelegramApiException e) {
@@ -114,6 +124,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     //головна клавіатура
     private ReplyKeyboardMarkup getMainMenu() {
 
+
         KeyboardRow row1 = new KeyboardRow();
         row1.add("Зберегти до бібліотеки");
         KeyboardRow row2 = new KeyboardRow();
@@ -122,9 +133,9 @@ public class TelegramBot extends TelegramLongPollingBot {
         rows.add(row1);
         rows.add(row2);
         replyKeyboardMarkup.setKeyboard(rows);
-
         return replyKeyboardMarkup;
     }
+
 
     private ReplyKeyboardMarkup getSaveMenu() {
 
@@ -133,27 +144,40 @@ public class TelegramBot extends TelegramLongPollingBot {
         List<KeyboardRow> rows = new ArrayList<>();
         rows.add(row1);
         replyKeyboardMarkup.setKeyboard(rows);
+
         return replyKeyboardMarkup;
     }
 
     //запис у першу мапу. потрібно для того, щоб по chatId отримати kay для другої мапи
-    public String preLibrarian(Long chatId, Message message) {
-        return preLibrary.put(chatId, message.getText());
+    public void preLibrarian(Message message) {
+        folder.add(message.getText());
+        nameOfFolder = message.getText();
     }
 
     // запис у другу головну мапу
-    public void librarian(Long chatId, Message message) {
-
-        String kay = preLibrary.get(chatId);
-        library.put(kay, (List<Message>) message);
+    public void librarian(Message message) {
+        result.add(message);
+        library.put(nameOfFolder, result);
     }
 
     // пошук об'єктів, повертає список обєктів
-    public List<Message> findObject(String message) {
-        return library.get(message);
+    public void preFindObject(Long chatId) {
+        sendObject(chatId, folder);
+
     }
-    public String preFindObject(Long chatId ) {
-        return preLibrary.get(chatId);
+
+    public void findObject(Long chatId, List<Message> result) {
+        int a = result.size();
+        for (int i = 0; i!=a; i++){
+            message.setChatId(chatId);
+            message.setEntities((List<MessageEntity>) result.get(i));
+            try {
+                execute(message);
+            } catch (TelegramApiException e) {
+
+            }
+        }
+
     }
 
 
