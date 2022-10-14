@@ -7,23 +7,19 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
     final BotConfig config;
+    private Keyboard keyboard = new Keyboard();
+    private Library library = new Library();
 
 
     public TelegramBot(BotConfig config) {
@@ -40,15 +36,10 @@ public class TelegramBot extends TelegramLongPollingBot {
         return config.getToken();
     }
 
-    List<String> folder = new ArrayList<>();
-    List<Message> result = new ArrayList<>();
-    HashMap<String, List<Message>> library = new HashMap<>(); // головна мапа
 
 
-    String nameOfFolder;
-    Message someMessage;
     SendMessage message = new SendMessage();
-    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -59,12 +50,12 @@ public class TelegramBot extends TelegramLongPollingBot {
             String name = update.getMessage().getChat().getFirstName();
             Message updateMessage = update.getMessage();
             long chatId = update.getMessage().getChatId();
-            String fileId = updateMessage.getDocument().getFileId();
+
 
 
             switch (updateMessage.getText()) {
                 case "/start":
-                    message.setReplyMarkup(getMainMenu());
+                    message.setReplyMarkup(keyboard.getMainMenu());
                     startCommandReceived(chatId, name);
 
                     break;
@@ -78,17 +69,18 @@ public class TelegramBot extends TelegramLongPollingBot {
                     break;
                 default:
                     if (updateMessage.hasText()) {
-                        if(!folder.contains(message.getText())){
-                            preLibrarian(updateMessage);
-                        }else nameOfFolder = updateMessage.getText();
+                        if(!library.folder.contains(message.getText())){
+                           library.preLibrarian(updateMessage);
+                        }else library.nameOfFolder = updateMessage.getText();
+
 
                         sendMsg(chatId, "Що зберегти (файл, ссилка, фото...)");
 
                     } else if (updateMessage.hasDocument()) {
                         // sendDoc(chatId,;
-                        if(library.containsKey(nameOfFolder)){
-                            librarian2(updateMessage);
-                        }else librarian(updateMessage);
+                        if(library.libraryOfMessage.containsKey(library.nameOfFolder)){
+                            library.librarian2(updateMessage);
+                        }else library.librarian(updateMessage);
                         // findObject(chatId,result);
                     }
             }
@@ -130,47 +122,22 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         }
     }
-
-    //головна клавіатура
-    private ReplyKeyboardMarkup getMainMenu() {
-
-
-        KeyboardRow row1 = new KeyboardRow();
-        row1.add("Зберегти до бібліотеки");
-        KeyboardRow row2 = new KeyboardRow();
-        row2.add("Знайти");
-        List<KeyboardRow> rows = new ArrayList<>();
-        rows.add(row1);
-        rows.add(row2);
-        replyKeyboardMarkup.setKeyboard(rows);
-        return replyKeyboardMarkup;
+    public void sendDoc(Long chatId, File sendFile) {
+        InputFile inputFile = new InputFile(String.valueOf(sendFile));
+        SendDocument sendDocument = new SendDocument();
+        sendDocument.setChatId(chatId);
+        sendDocument.setDocument(inputFile);
+        try {
+            execute(sendDocument);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-
-    //запис у перший лист. потрібно для того, щоб можна було знайти kеy для другої мапи.
-    public void preLibrarian(Message message) {
-
-        folder.add(message.getText());
-        nameOfFolder = message.getText();
-    }
-
-    // запис у  головну мапу
-    public void librarian(Message message) {
-        result.add(message);
-        library.put(nameOfFolder, result);
-        someMessage = message;
-    }
-
-    public void librarian2(Message message) {
-        List<Message> addNewObject = library.get(nameOfFolder);
-        addNewObject.add(message);
-        library.put(nameOfFolder,addNewObject);
-        someMessage = message;
-    }
 
     // пошук у першому лисі
     public void preFindObject(Long chatId) {
-        sendObject(chatId, folder);
+        sendObject(chatId, library.folder);
 
     }
 
@@ -190,17 +157,7 @@ public class TelegramBot extends TelegramLongPollingBot {
          }
 
      }*/
-    public void sendDoc(Long chatId, File sendFile) {
-        InputFile inputFile = new InputFile(String.valueOf(sendFile));
-        SendDocument sendDocument = new SendDocument();
-        sendDocument.setChatId(chatId);
-        sendDocument.setDocument(inputFile);
-        try {
-            execute(sendDocument);
-        } catch (TelegramApiException e) {
-            throw new RuntimeException(e);
-        }
-    }
+
     //userId -> massage
     // userid:metemateka -> List<messageId>
 
