@@ -7,12 +7,12 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
+
 import org.telegram.telegrambots.meta.api.objects.*;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.File;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 @Component
@@ -37,7 +37,6 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
 
-
     SendMessage message = new SendMessage();
 
 
@@ -45,14 +44,9 @@ public class TelegramBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
 
         if (update.hasMessage() && update.getMessage().hasText()) {
-            SendMessage message = new SendMessage();
-
             String name = update.getMessage().getChat().getFirstName();
             Message updateMessage = update.getMessage();
             long chatId = update.getMessage().getChatId();
-
-
-
             switch (updateMessage.getText()) {
                 case "/start":
                     message.setReplyMarkup(keyboard.getMainMenu());
@@ -61,27 +55,29 @@ public class TelegramBot extends TelegramLongPollingBot {
                     break;
                 case "Зберегти до бібліотеки":
                     sendMsg(chatId, "Назва папки в яку зберегти:");
+                    // повідомлення надіслане після цього піде у default
 
                     break;
                 case "Що зберегти (файл, ссилка, фото...)":
                     break;
-                case "Знайти":
+                case "Знайти": // ще ненаписано
                     break;
                 default:
-                    if (updateMessage.hasText()) {
-                        if(!library.folder.contains(message.getText())){
-                           library.preLibrarian(updateMessage);
-                        }else library.nameOfFolder = updateMessage.getText();
-
-
+                    if (updateMessage.hasText()) { // якщо повідомлення - текст
+                        if (!library.folder.contains(message.getText())) { // якщо у листі немає такого обєкту
+                            library.preLibrarian(updateMessage);
+                        } else library.nameOfFolder = updateMessage.getText();
                         sendMsg(chatId, "Що зберегти (файл, ссилка, фото...)");
+                        preFindObject(chatId); //показує обєкти List<String> folder
+                        // sendKeyboard(chatId,"Ваші папки", keyboard.getFolderMenu(library.folder));
 
-                    } else if (updateMessage.hasDocument()) {
-                        // sendDoc(chatId,;
-                        if(library.libraryOfMessage.containsKey(library.nameOfFolder)){
+                    } else if (updateMessage.hasDocument()) { // якщощо повідомлення документ.
+                        // Код тут не дописаний, бо я не знаю тип вхідного повідомлення
+                        //і ще не міг протемтувати методи нижче
+                        if (library.libraryOfMessage.containsKey(library.nameOfFolder)) { // якщо такий ключ вже є
                             library.librarian2(updateMessage);
-                        }else library.librarian(updateMessage);
-                        // findObject(chatId,result);
+                        } else library.librarian(updateMessage);
+
                     }
             }
         }
@@ -94,7 +90,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     //Надсилання списку
-    private void sendObject(Long chatId, List<String> messageToSand) {
+    private void sendList(Long chatId, List<String> messageToSand) {
 
         int a = messageToSand.size();
         for (int i = 0; i != a; i++) {
@@ -122,11 +118,25 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         }
     }
+    // не звертай увагу, ще не дописано
+    public void sendKeyboard(Long chatId, String text, InlineKeyboardMarkup inlineKeyboardMarkup){
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
+        sendMessage.setText(text);
+        sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+        try {
+            execute(sendMessage);
+        } catch (TelegramApiException e) {
+
+        }
+
+    }
+    // мало б надсилати документи, але setDocument() у якості аргументу хоче InputFile, який я не моду отримати просто так
     public void sendDoc(Long chatId, File sendFile) {
-        InputFile inputFile = new InputFile(String.valueOf(sendFile));
+
         SendDocument sendDocument = new SendDocument();
-        sendDocument.setChatId(chatId);
-        sendDocument.setDocument(inputFile);
+        sendDocument.setChatId(chatId.toString());
+        //sendDocument.setDocument(sendFile);
         try {
             execute(sendDocument);
         } catch (TelegramApiException e) {
@@ -137,11 +147,13 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     // пошук у першому лисі
     public void preFindObject(Long chatId) {
-        sendObject(chatId, library.folder);
+        sendList(chatId, library.folder);
 
     }
 
 
+
+//пробував виводити обєкти листа з документами, але для цього потрібно їх надсилати користувачу.
     /* public void findObject(Long chatId) {
          List<Message> object = library.get(nameOfFolder);
          int a = object.size();

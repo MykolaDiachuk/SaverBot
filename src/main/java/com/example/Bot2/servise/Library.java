@@ -10,35 +10,32 @@ public class Library {
     String nameOfFolder;
 
 
-    List<String> folder = new ArrayList<>();
-    List<Message> result = new ArrayList<>();
+    List<String> folder = new ArrayList<>(); // лист з назвами папок
+    List<Message> result = new ArrayList<>(); // лист з різними обєктами. як я вже дізнався, він не має бути типу Message,
+    // але я не можу поки добитися чогось іншого
     HashMap<String, List<Message>> libraryOfMessage = new HashMap<>();
 
-public String getNameOfFolder(){
-    return nameOfFolder;
-}
-public void setNameOfFolder(String nameOfFolder){
-    this.nameOfFolder = nameOfFolder;
-}
-
-    //запис у перший лист. потрібно для того, щоб можна було знайти kеy для другої мапи.
+    //запис у перший лист. потрібно для того, щоб можна було знайти kеy для мапи.
     public void preLibrarian(Message message) {
 
         folder.add(message.getText());
         nameOfFolder = message.getText();
     }
 
-    // запис у  головну мапу
+    // запис нового ключа зі значенням
     public void librarian(Message message) {
         result.add(message);
         libraryOfMessage.put(nameOfFolder, result);
 
     }
 
+    //метод для запису у існуючий ключ нове значення.
+    // Наприклад вже був ключ "математика" зі значенням List<> у якому зберігалася книжка і я додав  до "Математика" ще одну книжку.
+    // Тепер у листі будуть дві книжки.
     public void librarian2(Message message) {
         List<Message> addNewObject = libraryOfMessage.get(nameOfFolder);
         addNewObject.add(message);
-        libraryOfMessage.put(nameOfFolder,addNewObject);
+        libraryOfMessage.put(nameOfFolder, addNewObject);
 
     }
 }
