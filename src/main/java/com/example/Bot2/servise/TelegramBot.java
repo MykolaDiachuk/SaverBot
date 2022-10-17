@@ -2,8 +2,11 @@ package com.example.Bot2.servise;
 
 
 import com.example.Bot2.Config.BotConfig;
+import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
@@ -40,14 +43,17 @@ public class TelegramBot extends TelegramLongPollingBot {
     SendMessage message = new SendMessage();
 
 
+
+    @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
 
-        if (update.hasMessage() && update.getMessage().hasText()) {
+        if (update.hasMessage()) {
             String name = update.getMessage().getChat().getFirstName();
             Message updateMessage = update.getMessage();
             long chatId = update.getMessage().getChatId();
-            switch (updateMessage.getText()) {
+            String text = updateMessage.getText()==null?"":updateMessage.getText();
+            switch (text) {
                 case "/start":
                     message.setReplyMarkup(keyboard.getMainMenu());
                     startCommandReceived(chatId, name);
@@ -74,6 +80,26 @@ public class TelegramBot extends TelegramLongPollingBot {
                     } else if (updateMessage.hasDocument()) { // якщощо повідомлення документ.
                         // Код тут не дописаний, бо я не знаю тип вхідного повідомлення
                         //і ще не міг протемтувати методи нижче
+
+                        GetFile getFile = new GetFile();
+                        getFile.setFileId(updateMessage.getDocument().getFileId());
+                        String fileName = updateMessage.getDocument().getFileName();
+                        String filePath = null;
+                        try {
+                            File execute = execute(getFile);
+                            filePath = execute.getFilePath();
+
+                        } catch (TelegramApiException e) {
+                            throw new RuntimeException(e);
+                        }
+                        java.io.File file = new java.io.File(fileName);
+                        try {
+                            file = downloadFile(filePath,file);
+
+                        sendDoc(chatId,file,filePath);
+                        } catch (TelegramApiException e) {
+                            throw new RuntimeException(e);
+                        }
                         if (library.libraryOfMessage.containsKey(library.nameOfFolder)) { // якщо такий ключ вже є
                             library.librarian2(updateMessage);
                         } else library.librarian(updateMessage);
@@ -132,11 +158,12 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     }
     // мало б надсилати документи, але setDocument() у якості аргументу хоче InputFile, який я не моду отримати просто так
-    public void sendDoc(Long chatId, File sendFile) {
+    public void sendDoc(Long chatId, java.io.File file, String fileName) {
 
         SendDocument sendDocument = new SendDocument();
+        sendDocument.setCaption(fileName);
         sendDocument.setChatId(chatId.toString());
-        //sendDocument.setDocument(sendFile);
+        sendDocument.setDocument(new InputFile(file));
         try {
             execute(sendDocument);
         } catch (TelegramApiException e) {
