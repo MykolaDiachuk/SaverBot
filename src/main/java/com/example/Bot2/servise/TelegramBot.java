@@ -66,7 +66,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                     break;
                 case "Що зберегти (файл, ссилка, фото...)":
                     break;
-                case "Знайти": // ще ненаписано
+                case "Знайти":
+
                     break;
                 default:
                     if (updateMessage.hasText()) { // якщо повідомлення - текст
@@ -74,7 +75,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                             library.preLibrarian(updateMessage);
                         } else library.nameOfFolder = updateMessage.getText();
                         sendMsg(chatId, "Що зберегти (файл, ссилка, фото...)");
-                        preFindObject(chatId); //показує обєкти List<String> folder
+                        // preFindObject(chatId); //показує обєкти List<String> folder
                         // sendKeyboard(chatId,"Ваші папки", keyboard.getFolderMenu(library.folder));
 
                     } else if (updateMessage.hasDocument()) { // якщощо повідомлення документ.
@@ -96,13 +97,14 @@ public class TelegramBot extends TelegramLongPollingBot {
                         try {
                             file = downloadFile(filePath,file);
 
-                        sendDoc(chatId,file,filePath);
+
                         } catch (TelegramApiException e) {
                             throw new RuntimeException(e);
                         }
                         if (library.libraryOfMessage.containsKey(library.nameOfFolder)) { // якщо такий ключ вже є
-                            library.librarian2(updateMessage);
-                        } else library.librarian(updateMessage);
+                            library.librarian2(file);
+                        } else library.librarian(file);
+                        findObject(chatId,fileName);
 
                     }
             }
@@ -178,24 +180,15 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     }
 
-
-
 //пробував виводити обєкти листа з документами, але для цього потрібно їх надсилати користувачу.
-    /* public void findObject(Long chatId) {
-         List<Message> object = library.get(nameOfFolder);
-         int a = object.size();
+    public void findObject(Long chatId,String fileName) {
+         List<java.io.File> object = library.libraryOfMessage.get(library.nameOfFolder);
+         int a= object.size();
          for (int i = 0; i!=a; i++){
-             message.setChatId(chatId);
-
-
-             try {
-                 execute(message);
-             } catch (TelegramApiException e) {
-
-             }
+             sendDoc(chatId,object.get(i),fileName);
          }
 
-     }*/
+     }
 
     //userId -> massage
     // userid:metemateka -> List<messageId>

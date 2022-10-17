@@ -11,9 +11,9 @@ public class Library {
 
 
     List<String> folder = new ArrayList<>(); // лист з назвами папок
-    List<Message> result = new ArrayList<>(); // лист з різними обєктами. як я вже дізнався, він не має бути типу Message,
+    List< java.io.File> result = new ArrayList<>(); // лист з різними обєктами. як я вже дізнався, він не має бути типу Message,
     // але я не можу поки добитися чогось іншого
-    HashMap<String, List<Message>> libraryOfMessage = new HashMap<>();
+    HashMap<String, List< java.io.File>> libraryOfMessage = new HashMap<>();
 
     //запис у перший лист. потрібно для того, щоб можна було знайти kеy для мапи.
     public void preLibrarian(Message message) {
@@ -23,7 +23,7 @@ public class Library {
     }
 
     // запис нового ключа зі значенням
-    public void librarian(Message message) {
+    public void librarian( java.io.File message) {
         result.add(message);
         libraryOfMessage.put(nameOfFolder, result);
 
@@ -32,8 +32,8 @@ public class Library {
     //метод для запису у існуючий ключ нове значення.
     // Наприклад вже був ключ "математика" зі значенням List<> у якому зберігалася книжка і я додав  до "Математика" ще одну книжку.
     // Тепер у листі будуть дві книжки.
-    public void librarian2(Message message) {
-        List<Message> addNewObject = libraryOfMessage.get(nameOfFolder);
+    public void librarian2( java.io.File message) {
+        List< java.io.File> addNewObject = libraryOfMessage.get(nameOfFolder);
         addNewObject.add(message);
         libraryOfMessage.put(nameOfFolder, addNewObject);
 
