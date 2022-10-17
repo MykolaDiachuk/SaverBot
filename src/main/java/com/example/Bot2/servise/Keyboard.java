@@ -26,22 +26,21 @@ public class Keyboard {
         return replyKeyboardMarkup;
     }
 
-    //не звертай уваги. недописаний поки що код
-    public InlineKeyboardMarkup getFolderMenu(List<String> folder) {
+    List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+
+
+    public InlineKeyboardMarkup getFolderMenu(List<String> folder) { //все ще є проблема
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
         List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
-        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         int a = folder.size();
-        for (int i = 0; i != a; i++) {
+        for (int i = rowList.size(); i != a; i++) {
+
             inlineKeyboardButton.setText(folder.get(i));
             inlineKeyboardButton.setCallbackData(folder.get(i));
             keyboardButtonsRow1.add(inlineKeyboardButton);
         }
-
         rowList.add(keyboardButtonsRow1);
-
-
         inlineKeyboardMarkup.setKeyboard(rowList);
         return inlineKeyboardMarkup;
     }

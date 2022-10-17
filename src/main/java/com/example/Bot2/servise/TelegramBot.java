@@ -43,7 +43,6 @@ public class TelegramBot extends TelegramLongPollingBot {
     SendMessage message = new SendMessage();
 
 
-
     @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
@@ -52,7 +51,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             String name = update.getMessage().getChat().getFirstName();
             Message updateMessage = update.getMessage();
             long chatId = update.getMessage().getChatId();
-            String text = updateMessage.getText()==null?"":updateMessage.getText();
+            String text = updateMessage.getText() == null ? "" : updateMessage.getText();
             switch (text) {
                 case "/start":
                     message.setReplyMarkup(keyboard.getMainMenu());
@@ -67,7 +66,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case "Що зберегти (файл, ссилка, фото...)":
                     break;
                 case "Знайти":
+                    sendKeyboard(chatId, "Ваші папки", keyboard.getFolderMenu(library.folder));
+                    if(update.hasCallbackQuery()){
 
+                    }
                     break;
                 default:
                     if (updateMessage.hasText()) { // якщо повідомлення - текст
@@ -76,12 +78,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         } else library.nameOfFolder = updateMessage.getText();
                         sendMsg(chatId, "Що зберегти (файл, ссилка, фото...)");
                         // preFindObject(chatId); //показує обєкти List<String> folder
-                        // sendKeyboard(chatId,"Ваші папки", keyboard.getFolderMenu(library.folder));
-
                     } else if (updateMessage.hasDocument()) { // якщощо повідомлення документ.
-                        // Код тут не дописаний, бо я не знаю тип вхідного повідомлення
-                        //і ще не міг протемтувати методи нижче
-
                         GetFile getFile = new GetFile();
                         getFile.setFileId(updateMessage.getDocument().getFileId());
                         String fileName = updateMessage.getDocument().getFileName();
@@ -95,7 +92,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         }
                         java.io.File file = new java.io.File(fileName);
                         try {
-                            file = downloadFile(filePath,file);
+                            file = downloadFile(filePath, file);
 
 
                         } catch (TelegramApiException e) {
@@ -104,7 +101,13 @@ public class TelegramBot extends TelegramLongPollingBot {
                         if (library.libraryOfMessage.containsKey(library.nameOfFolder)) { // якщо такий ключ вже є
                             library.librarian2(file);
                         } else library.librarian(file);
-                        findObject(chatId,fileName);
+                        if(update.hasCallbackQuery()){
+                            library.nameOfFolder = update.getCallbackQuery().getData();
+                            sendMsg(chatId,library.nameOfFolder);//перевірка
+                            findObject(chatId, fileName);
+                        }
+
+
 
                     }
             }
@@ -146,8 +149,9 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         }
     }
+
     // не звертай увагу, ще не дописано
-    public void sendKeyboard(Long chatId, String text, InlineKeyboardMarkup inlineKeyboardMarkup){
+    public void sendKeyboard(Long chatId, String text, InlineKeyboardMarkup inlineKeyboardMarkup) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
         sendMessage.setText(text);
@@ -159,6 +163,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
 
     }
+
     // мало б надсилати документи, але setDocument() у якості аргументу хоче InputFile, який я не моду отримати просто так
     public void sendDoc(Long chatId, java.io.File file, String fileName) {
 
@@ -180,15 +185,15 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     }
 
-//пробував виводити обєкти листа з документами, але для цього потрібно їх надсилати користувачу.
-    public void findObject(Long chatId,String fileName) {
-         List<java.io.File> object = library.libraryOfMessage.get(library.nameOfFolder);
-         int a= object.size();
-         for (int i = 0; i!=a; i++){
-             sendDoc(chatId,object.get(i),fileName);
-         }
+    //пробував виводити обєкти листа з документами, але для цього потрібно їх надсилати користувачу.
+    public void findObject(Long chatId, String fileName) {
+        List<java.io.File> object = library.libraryOfMessage.get(library.nameOfFolder);
+        int a = object.size();
+        for (int i = 0; i != a; i++) {
+            sendDoc(chatId, object.get(i), fileName);
+        }
 
-     }
+    }
 
     //userId -> massage
     // userid:metemateka -> List<messageId>
