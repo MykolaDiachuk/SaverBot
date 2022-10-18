@@ -52,6 +52,8 @@ public class TelegramBot extends TelegramLongPollingBot {
             Message updateMessage = update.getMessage();
             long chatId = update.getMessage().getChatId();
             String text = updateMessage.getText() == null ? "" : updateMessage.getText();
+
+
             switch (text) {
                 case "/start":
                     message.setReplyMarkup(keyboard.getMainMenu());
@@ -67,11 +69,15 @@ public class TelegramBot extends TelegramLongPollingBot {
                     break;
                 case "Знайти":
                     sendKeyboard(chatId, "Ваші папки", keyboard.getFolderMenu(library.folder));
-                    if(update.hasCallbackQuery()){
-
-                    }
                     break;
                 default:
+                    if(update.hasCallbackQuery()){
+                        CallbackQuery callbackQuery = update.getCallbackQuery();
+                        String data = callbackQuery.getData();
+                        library.nameOfFolder = data;
+                        sendMsg(chatId,library.nameOfFolder);//перевірка
+                        //findObject(chatId, fileName);
+                    }
                     if (updateMessage.hasText()) { // якщо повідомлення - текст
                         if (!library.folder.contains(message.getText())) { // якщо у листі немає такого обєкту
                             library.preLibrarian(updateMessage);
@@ -101,13 +107,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                         if (library.libraryOfMessage.containsKey(library.nameOfFolder)) { // якщо такий ключ вже є
                             library.librarian2(file);
                         } else library.librarian(file);
-                        if(update.hasCallbackQuery()){
-                            library.nameOfFolder = update.getCallbackQuery().getData();
-                            sendMsg(chatId,library.nameOfFolder);//перевірка
-                            findObject(chatId, fileName);
-                        }
-
-
 
                     }
             }
