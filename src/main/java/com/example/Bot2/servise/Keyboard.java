@@ -27,20 +27,20 @@ public class Keyboard {
     }
 
     List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-
+    InlineKeyboardButton inlineKeyboardButton;
 
     public InlineKeyboardMarkup getFolderMenu(List<String> folder) { //все ще є проблема
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-        List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
-        int a = folder.size();
-        for (int i = rowList.size(); i != a; i++) {
 
+        for (int i = rowList.size(); i < folder.size(); i++) {
+            inlineKeyboardButton = new InlineKeyboardButton();
             inlineKeyboardButton.setText(folder.get(i));
             inlineKeyboardButton.setCallbackData(folder.get(i));
+            List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
             keyboardButtonsRow1.add(inlineKeyboardButton);
+            rowList.add(keyboardButtonsRow1);
         }
-        rowList.add(keyboardButtonsRow1);
+
         inlineKeyboardMarkup.setKeyboard(rowList);
         return inlineKeyboardMarkup;
     }

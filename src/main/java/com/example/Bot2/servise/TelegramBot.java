@@ -14,8 +14,10 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -71,19 +73,23 @@ public class TelegramBot extends TelegramLongPollingBot {
                     sendKeyboard(chatId, "Ваші папки", keyboard.getFolderMenu(library.folder));
                     break;
                 default:
-                    if(update.hasCallbackQuery()){
-                        CallbackQuery callbackQuery = update.getCallbackQuery();
-                        String data = callbackQuery.getData();
-                        library.nameOfFolder = data;
-                        sendMsg(chatId,library.nameOfFolder);//перевірка
-                        //findObject(chatId, fileName);
-                    }
-                    if (updateMessage.hasText()) { // якщо повідомлення - текст
-                        if (!library.folder.contains(message.getText())) { // якщо у листі немає такого обєкту
+                    if (updateMessage.hasText()) {// якщо повідомлення - текст
+                        if(updateMessage.hasEntities()) {
+                            MessageEntity messageEntity = new MessageEntity();
+                            messageEntity.setType("text_link");
+                            messageEntity.setUrl(updateMessage.getText());
+                            messageEntity.setOffset(0);
+                            messageEntity.setLength(4);
+                            List<MessageEntity> entities = new ArrayList<>();
+                            entities.add(messageEntity);
+
+
+                        }else if (!library.folder.contains(updateMessage.getText())) { // якщо у листі немає такого обєкту
                             library.preLibrarian(updateMessage);
-                        } else library.nameOfFolder = updateMessage.getText();
-                        sendMsg(chatId, "Що зберегти (файл, ссилка, фото...)");
-                        // preFindObject(chatId); //показує обєкти List<String> folder
+                            sendMsg(chatId, "Що зберегти (файл, ссилка, фото...)");
+                        } else { library.nameOfFolder = updateMessage.getText();
+                            sendMsg(chatId, "Що зберегти (файл, ссилка, фото...)");
+                        }
                     } else if (updateMessage.hasDocument()) { // якщощо повідомлення документ.
                         GetFile getFile = new GetFile();
                         getFile.setFileId(updateMessage.getDocument().getFileId());
@@ -108,8 +114,15 @@ public class TelegramBot extends TelegramLongPollingBot {
                             library.librarian2(file);
                         } else library.librarian(file);
 
+                    } else if (updateMessage.hasPhoto()){
+                        sendMsg(chatId,"photo");
                     }
             }
+        } else if (update.hasCallbackQuery()) {
+            CallbackQuery callbackQuery = update.getCallbackQuery();
+            String data = callbackQuery.getData();
+            library.nameOfFolder = data;
+            findObject(update.getCallbackQuery().getMessage().getChatId(), data);
         }
     }
 
@@ -148,6 +161,17 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         }
     }
+    /*  private void sendUlr(long chatId, ){
+        SendMessage message = new SendMessage();
+        message.setChatId(String.valueOf(chatId));
+        message.setEntities(entities);
+        message.setText(updateMessage.getText());
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }*/
 
     // не звертай увагу, ще не дописано
     public void sendKeyboard(Long chatId, String text, InlineKeyboardMarkup inlineKeyboardMarkup) {
