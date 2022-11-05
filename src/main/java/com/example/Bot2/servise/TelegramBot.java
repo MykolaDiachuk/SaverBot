@@ -5,26 +5,25 @@ import com.example.Bot2.Config.BotConfig;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-
-
 import org.telegram.telegrambots.meta.api.objects.*;
-import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-@Component
+
 public class TelegramBot extends TelegramLongPollingBot {
     final BotConfig config;
- private final Serialization serial = new Serialization();
+    // private final Serialization serial = new Serialization();
     private final Keyboard keyboard = new Keyboard();
     private final Library library = new Library();
+    SendMessage message = new SendMessage();
+    long chatId = 0;
+    Message updateMsg = null;
 
 
     public TelegramBot(BotConfig config) {
@@ -41,16 +40,10 @@ public class TelegramBot extends TelegramLongPollingBot {
         return config.getToken();
     }
 
-
-    SendMessage message = new SendMessage();
-    long chatId=0;
-
-    Message updateMsg = null;
-
     @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
-        this.updateMsg=update.getMessage();
+        this.updateMsg = update.getMessage();
 
         if (update.hasMessage()) {
             String name = update.getMessage().getChat().getFirstName();
@@ -78,7 +71,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     break;
                 default:
                     if (updateMessage.hasText()) {// якщо повідомлення - текст
-                        if(updateMessage.hasEntities()) {
+                        if (updateMessage.hasEntities()) {
                             MessageEntity messageEntity = new MessageEntity();
                             messageEntity.setType("text_link");
                             messageEntity.setUrl(updateMessage.getText());
@@ -88,10 +81,11 @@ public class TelegramBot extends TelegramLongPollingBot {
                             //java.io.File file = ResourceUtils.getFile("C:\\Games\\Bot2\\src\\main\\resources\\new.txt");
                             saveObject(messageEntity);
 
-                        }else if (!library.folder.contains(updateMessage.getText())) { // якщо у листі немає такого обєкту
+                        } else if (!library.folder.contains(updateMessage.getText())) { // якщо у листі немає такого обєкту
                             library.preLibrarian(updateMessage);
                             sendMsg(chatId, "Що зберегти (файл, ссилка, фото...)");
-                        } else { library.nameOfFolder = updateMessage.getText();
+                        } else {
+                            library.nameOfFolder = updateMessage.getText();
                             sendMsg(chatId, "Що зберегти (файл, ссилка, фото...)");
                         }
                     } else if (updateMessage.hasDocument()) { // якщощо повідомлення документ.
@@ -114,13 +108,13 @@ public class TelegramBot extends TelegramLongPollingBot {
                         } catch (TelegramApiException e) {
                             throw new RuntimeException(e);
                         }
-                       // serial.serialization(file);
+                        // serial.serialization(file);
                         //java.io.File file1 = ResourceUtils.getFile("C:\\Games\\Bot2\\src\\main\\resources\\new.txt");
-                         saveObject(file);
+                        saveObject(file);
 
 
-                    } else if (updateMessage.hasPhoto()){
-                        sendMsg(chatId,"photo");
+                    } else if (updateMessage.hasPhoto()) {
+                        sendMsg(chatId, "photo");
                     }
             }
         } else if (update.hasCallbackQuery()) {
@@ -131,10 +125,10 @@ public class TelegramBot extends TelegramLongPollingBot {
             List object = library.libraryOfMessage.get(library.nameOfFolder);
             int a = object.size();
             for (int i = 0; i != a; i++) {
-                send(chatId,object.get(i));
+                send(chatId, object.get(i));
 
             }
-            sendMsg(chatId,"d");
+            sendMsg(chatId, "d");
         }
     }
 
@@ -143,11 +137,13 @@ public class TelegramBot extends TelegramLongPollingBot {
         String answer = "Hi, " + name + ", nice to meet you!";
         sendMsg(chatId, answer);
     }
-public void saveObject(Object file){
-    if (library.libraryOfMessage.containsKey(library.nameOfFolder)) { // якщо такий ключ вже є
-        library.librarian2(file);
-    } else library.librarian(file);
-}
+
+    public void saveObject(Object file) {
+        if (library.libraryOfMessage.containsKey(library.nameOfFolder)) { // якщо такий ключ вже є
+            library.librarian2(file);
+        } else library.librarian(file);
+    }
+
     //Надсилання списку
     private void sendList(Long chatId, List<String> messageToSand) {
 
@@ -177,7 +173,8 @@ public void saveObject(Object file){
 
         }
     }
-     private void send(long chatId, List<MessageEntity> entities ){
+
+    private void send(long chatId, List<MessageEntity> entities) {
 
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
@@ -209,9 +206,9 @@ public void saveObject(Object file){
     public void send(Long chatId, Object file) {
 
         SendDocument sendDocument = new SendDocument();
-        sendDocument.setCaption(((java.io.File)file).getName());
+        sendDocument.setCaption(((java.io.File) file).getName());
         sendDocument.setChatId(chatId.toString());
-        sendDocument.setDocument(new InputFile((java.io.File)file));
+        sendDocument.setDocument(new InputFile((java.io.File) file));
         try {
             execute(sendDocument);
         } catch (TelegramApiException e) {
@@ -242,8 +239,6 @@ public void saveObject(Object file){
         }
 
     }*/
-
-
 
 
 }
