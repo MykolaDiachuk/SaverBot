@@ -196,7 +196,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         sendMessage.setReplyMarkup(inlineKeyboardMarkup);
         try {
             execute(sendMessage);
-        } catch (TelegramApiException e) {
+        } catch (TelegramApiException ignored) {
 
         }
 
