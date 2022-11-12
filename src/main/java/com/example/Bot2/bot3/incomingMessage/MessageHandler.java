@@ -5,6 +5,7 @@ import com.example.Bot2.bot3.resource.ArtifactRepository;
 import com.example.Bot2.bot3.resource.DialogService;
 import com.example.Bot2.bot3.resource.Keyboard;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -25,12 +26,17 @@ public class MessageHandler implements Handler {
     @Override
     public void handle(Update update) {
 
+
         String text = update.getMessage().getText();
         switch (text) {
             case "Зберегти до папки":
                 dialogService.sendMessage(update.getMessage().getChatId(), "Назва папки в яку зберегти:");
                 break;
             case "Що зберегти (файл, ссилка, фото...)":
+                break;
+            case "Додати до папки":
+                dialogService.sendKeyboard(update.getMessage().getChatId(), "Оберіть папку",
+                        Keyboard.getMenuToAdd(artifactRepository.folderNames.get(update.getMessage().getFrom().getId())));
                 break;
             case "Знайти":
                 if (!artifactRepository.folderNames.containsKey(update.getMessage().getFrom().getId())

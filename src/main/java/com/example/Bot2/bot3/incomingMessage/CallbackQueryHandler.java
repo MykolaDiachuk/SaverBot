@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -20,23 +21,33 @@ public class CallbackQueryHandler implements Handler {
     @Autowired
     DialogService dialogService;
 
+
     @Override
     public void handle(Update update) {
+        if (update.getCallbackQuery().getData().equals(update.getCallbackQuery().getData() + "add")) {
+            artifactRepository.nameOfFolder.put(update.getCallbackQuery().getFrom().getId(), update.getCallbackQuery().getData());
 
-        artifactRepository.nameOfFolder.put(update.getCallbackQuery().getFrom().getId(),update.getCallbackQuery().getData());
-
-        Folder folder = artifactRepository.getFolder(update.getCallbackQuery().getFrom().getId(),
-                artifactRepository.nameOfFolder.get(update.getCallbackQuery().getFrom().getId()));
-        if(folder.getArtifacts()==null){
-            dialogService.sendMessage(update.getCallbackQuery().getMessage().getChatId(),"Папка пуста");
-        } else {
-            dialogService.sendMessage(update.getCallbackQuery().getMessage().getChatId(),
-                    "Вміст папки " + '"' + artifactRepository.nameOfFolder.get(update.getCallbackQuery().getFrom().getId()) + '"');
-            List<Artifact> artifacts = folder.getArtifacts();
-            for (Artifact artifact : artifacts) {
-                dialogService.forwardMessage(artifact.getChatId(), artifact.getChatId(), artifact.getMessageId());
+            Folder folder = artifactRepository.getFolder(update.getCallbackQuery().getFrom().getId(),
+                    artifactRepository.nameOfFolder.get(update.getCallbackQuery().getFrom().getId()));
+            if (folder.getArtifacts() == null) {
+                dialogService.sendMessage(update.getCallbackQuery().getMessage().getChatId(), "Папка пуста");
+            } else {
+                dialogService.sendMessage(update.getCallbackQuery().getMessage().getChatId(),
+                        "Вміст папки " + '"' + artifactRepository.nameOfFolder.get(update.getCallbackQuery().getFrom().getId()) + '"');
+                List<Artifact> artifacts = folder.getArtifacts();
+                for (Artifact artifact : artifacts) {
+                    dialogService.forwardMessage(artifact.getChatId(), artifact.getChatId(), artifact.getMessageId());
+                }
             }
-        }
+        }else {
+            String callback = update.getCallbackQuery().getData();
+            callback =callback.substring(0,callback.length()-3);
 
+        }
     }
+
+
+
+
+
 }

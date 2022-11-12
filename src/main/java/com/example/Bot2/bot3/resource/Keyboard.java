@@ -18,18 +18,21 @@ public class Keyboard {
         KeyboardRow row1 = new KeyboardRow();
         row1.add("Зберегти до папки");
         KeyboardRow row2 = new KeyboardRow();
+        row1.add("Додати до папки");
+        KeyboardRow row3 = new KeyboardRow();
         row2.add("Знайти");
         List<KeyboardRow> rows = new ArrayList<>();
         rows.add(row1);
         rows.add(row2);
+        rows.add(row3);
         replyKeyboardMarkup.setKeyboard(rows);
         return replyKeyboardMarkup;
     }
 
-   static List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+    static List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
     static InlineKeyboardButton inlineKeyboardButton;
 
-    public static InlineKeyboardMarkup getFolderMenu( List<String> folderNames) {
+    public static InlineKeyboardMarkup getFolderMenu(List<String> folderNames) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
 
         for (int i = rowList.size(); i < folderNames.size(); i++) {
@@ -42,6 +45,27 @@ public class Keyboard {
         }
 
         inlineKeyboardMarkup.setKeyboard(rowList);
+        inlineKeyboardButton = new InlineKeyboardButton();
+        rowList = new ArrayList<>();
+        return inlineKeyboardMarkup;
+    }
+    public static InlineKeyboardMarkup getMenuToAdd(List<String> folderNames) {
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+
+        for (int i = rowList.size(); i < folderNames.size(); i++) {
+            inlineKeyboardButton = new InlineKeyboardButton();
+            inlineKeyboardButton.setText("Додати до " +'"'  +folderNames.get(i) + '"');
+            inlineKeyboardButton.setCallbackData(folderNames.get(i)+"add");
+            List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
+            keyboardButtonsRow1.add(inlineKeyboardButton);
+            rowList.add(keyboardButtonsRow1);
+        }
+
+        inlineKeyboardMarkup.setKeyboard(rowList);
+        inlineKeyboardButton = new InlineKeyboardButton();
+        rowList = new ArrayList<>();
         return inlineKeyboardMarkup;
     }
 }
+
+
