@@ -17,9 +17,9 @@ public class ArtifactRepository {
 
 
     private final Map<Long, Map<String, Folder>> userFolders = new HashMap<>();
-    public final List<String> folderNames = new ArrayList<>();
+    public final Map<Long, List<String>> folderNames = new HashMap<>();
 
-    public String nameOfFolder;
+    public final Map<Long,String> nameOfFolder = new HashMap<>();
 
 
     public void createFolder(Long userId, Folder folder) {
@@ -31,26 +31,41 @@ public class ArtifactRepository {
             folders.replace(folder.getName(), folder);
         } else {
             folders.put(folder.getName(), folder);
-            folderNames.add(folder.getName());
+            List<String> temp;
+            if (!folderNames.containsKey(userId)) {
+                temp = new ArrayList<>();
+            } else {
+                temp = folderNames.get(userId);
+            }
+            temp.add(folder.getName());
+            folderNames.put(userId, temp);
+
         }
         userFolders.put(userId, folders);
-        nameOfFolder = folder.getName();
+        nameOfFolder.put(userId,folder.getName());
     }
 
-    public void saveArtifact(Update update){
+    public void saveArtifact(Update update,Long userId) {
         Artifact artifact = new Artifact();
         artifact.setChatId(update.getMessage().getChatId());
         artifact.setUserId(update.getMessage().getFrom().getId());
         artifact.setMessageId(update.getMessage().getMessageId());
-        Folder folder = getFolder(update.getMessage().getFrom().getId(), nameOfFolder);
-        if(folder.getArtifacts()==null){
+        Folder folder = getFolder(update.getMessage().getFrom().getId(), nameOfFolder.get(userId));
+        if (folder.getArtifacts() == null) {
             List<Artifact> artifacts = new ArrayList<>();
             artifacts.add(artifact);
             folder.setArtifacts(artifacts);
-        }else folder.getArtifacts().add(artifact);
-        createFolder(update.getMessage().getFrom().getId(),folder);
+        } else folder.getArtifacts().add(artifact);
+        createFolder(update.getMessage().getFrom().getId(), folder);
     }
 
+    public boolean isExist(String nameFolder, Long userId) {
+        if(folderNames.isEmpty()){
+            return false;
+        }else if (folderNames.get(userId)==null){
+            return false;
+        }else return folderNames.get(userId).contains(nameFolder);
+    }
 
     public Map<String, Folder> getFolders(Long userId) {
         Map<String, Folder> folders = userFolders.get(userId);

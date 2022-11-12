@@ -1,4 +1,4 @@
-package com.example.Bot2.servise;
+package com.example.Bot2.bot3.resource;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -16,7 +16,7 @@ public class Keyboard {
     public static ReplyKeyboardMarkup getMainMenu() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         KeyboardRow row1 = new KeyboardRow();
-        row1.add("Зберегти до бібліотеки");
+        row1.add("Зберегти до папки");
         KeyboardRow row2 = new KeyboardRow();
         row2.add("Знайти");
         List<KeyboardRow> rows = new ArrayList<>();
@@ -29,13 +29,13 @@ public class Keyboard {
    static List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
     static InlineKeyboardButton inlineKeyboardButton;
 
-    public static InlineKeyboardMarkup getFolderMenu(List<String> folder) {
+    public static InlineKeyboardMarkup getFolderMenu( List<String> folderNames) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
 
-        for (int i = rowList.size(); i < folder.size(); i++) {
+        for (int i = rowList.size(); i < folderNames.size(); i++) {
             inlineKeyboardButton = new InlineKeyboardButton();
-            inlineKeyboardButton.setText(folder.get(i));
-            inlineKeyboardButton.setCallbackData(folder.get(i));
+            inlineKeyboardButton.setText(folderNames.get(i));
+            inlineKeyboardButton.setCallbackData(folderNames.get(i));
             List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
             keyboardButtonsRow1.add(inlineKeyboardButton);
             rowList.add(keyboardButtonsRow1);

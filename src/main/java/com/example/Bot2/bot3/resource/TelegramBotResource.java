@@ -2,10 +2,7 @@ package com.example.Bot2.bot3.resource;
 
 import com.example.Bot2.Config.BotConfig;
 
-import com.example.Bot2.bot3.incomingMessage.CallbackQueryHandler;
-import com.example.Bot2.bot3.incomingMessage.DocumentHandler;
-import com.example.Bot2.bot3.incomingMessage.EntityHandler;
-import com.example.Bot2.bot3.incomingMessage.MessageHandler;
+import com.example.Bot2.bot3.incomingMessage.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -27,14 +24,23 @@ public class TelegramBotResource extends TelegramLongPollingBot {
 
     private final CallbackQueryHandler callbackQueryHandler;
 
+    private final PhotoHandler photoHandler;
+
+    private final AudioHandler audioHandler;
+
+    private final ManyOtherHandlers manyOtherHandlers;
+
     @Autowired
     @Lazy
-    public TelegramBotResource(BotConfig botConfig, MessageHandler messageHandler, EntityHandler entityHandler, DocumentHandler documentHandler, CallbackQueryHandler callbackQueryHandler) {
+    public TelegramBotResource(BotConfig botConfig, MessageHandler messageHandler, EntityHandler entityHandler, DocumentHandler documentHandler, CallbackQueryHandler callbackQueryHandler, PhotoHandler photoHandler, AudioHandler audioHandler, ManyOtherHandlers manyOtherHandlers) {
         this.botConfig = botConfig;
         this.messageHandler = messageHandler;
         this.entityHandler = entityHandler;
         this.documentHandler = documentHandler;
         this.callbackQueryHandler = callbackQueryHandler;
+        this.photoHandler = photoHandler;
+        this.audioHandler = audioHandler;
+        this.manyOtherHandlers = manyOtherHandlers;
     }
 
 
@@ -57,7 +63,11 @@ public class TelegramBotResource extends TelegramLongPollingBot {
                 else messageHandler.handle(update);
             } else if (update.getMessage().hasDocument()) {
                 documentHandler.handle(update);
-            }
+            } else if (update.getMessage().hasPhoto()){
+                photoHandler.handle(update);
+            } else if (update.getMessage().hasAudio()){
+                audioHandler.handle(update);
+            }else manyOtherHandlers.handle(update);
         } else callbackQueryHandler.handle(update);
 
     }
