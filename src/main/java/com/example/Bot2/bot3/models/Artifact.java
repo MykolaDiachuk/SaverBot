@@ -4,9 +4,9 @@ import lombok.Data;
 
 @Data
 public class Artifact {
-    private String messageId;
+    private Integer messageId;
 
-    private String chatId;
+    private Long chatId;
 
-    private String userId;
+    private Long userId;
 }

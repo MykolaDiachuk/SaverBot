@@ -8,7 +8,7 @@ import java.util.List;
 public class Folder {
     private String name;
 
-    private String userId;
+    private Long userId;
 
     private List<Artifact> artifacts;
 }

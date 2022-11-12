@@ -103,8 +103,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                         java.io.File file = new java.io.File(fileName);
                         try {
                             file = downloadFile(filePath, file);
-
-
                         } catch (TelegramApiException e) {
                             throw new RuntimeException(e);
                         }
@@ -197,9 +195,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         try {
             execute(sendMessage);
         } catch (TelegramApiException ignored) {
-
         }
-
     }
 
     // мало б надсилати документи, але setDocument() у якості аргументу хоче InputFile, який я не моду отримати просто так

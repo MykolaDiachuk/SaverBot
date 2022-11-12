@@ -7,8 +7,9 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 
-@Configuration
+
 @Data
+@Configuration
 @Component
 @PropertySource("application.properties")
 public class BotConfig {

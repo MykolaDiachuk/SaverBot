@@ -10,10 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Keyboard {
-    // Library library = new Library();
+
 
     //головна клавіатура
-    public ReplyKeyboardMarkup getMainMenu() {
+    public static ReplyKeyboardMarkup getMainMenu() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         KeyboardRow row1 = new KeyboardRow();
         row1.add("Зберегти до бібліотеки");
@@ -26,10 +26,10 @@ public class Keyboard {
         return replyKeyboardMarkup;
     }
 
-    List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-    InlineKeyboardButton inlineKeyboardButton;
+   static List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+    static InlineKeyboardButton inlineKeyboardButton;
 
-    public InlineKeyboardMarkup getFolderMenu(List<String> folder) { //все ще є проблема
+    public static InlineKeyboardMarkup getFolderMenu(List<String> folder) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
 
         for (int i = rowList.size(); i < folder.size(); i++) {
