@@ -4,6 +4,7 @@ import com.example.Bot2.bot3.models.Artifact;
 import com.example.Bot2.bot3.models.Folder;
 import com.example.Bot2.bot3.resource.ArtifactRepository;
 import com.example.Bot2.bot3.resource.DialogService;
+import com.example.Bot2.bot3.resource.Keyboard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -24,30 +25,25 @@ public class CallbackQueryHandler implements Handler {
 
     @Override
     public void handle(Update update) {
-        if (update.getCallbackQuery().getData().equals(update.getCallbackQuery().getData() + "add")) {
+        if (!Keyboard.isCalledToAdd && !Keyboard.isCalledToRemoveFolder && !Keyboard.isCalledToRemoveArtifact) {
             artifactRepository.nameOfFolder.put(update.getCallbackQuery().getFrom().getId(), update.getCallbackQuery().getData());
+            dialogService.forwardArtifacts(update);
 
-            Folder folder = artifactRepository.getFolder(update.getCallbackQuery().getFrom().getId(),
-                    artifactRepository.nameOfFolder.get(update.getCallbackQuery().getFrom().getId()));
-            if (folder.getArtifacts() == null) {
-                dialogService.sendMessage(update.getCallbackQuery().getMessage().getChatId(), "Папка пуста");
-            } else {
-                dialogService.sendMessage(update.getCallbackQuery().getMessage().getChatId(),
-                        "Вміст папки " + '"' + artifactRepository.nameOfFolder.get(update.getCallbackQuery().getFrom().getId()) + '"');
-                List<Artifact> artifacts = folder.getArtifacts();
-                for (Artifact artifact : artifacts) {
-                    dialogService.forwardMessage(artifact.getChatId(), artifact.getChatId(), artifact.getMessageId());
-                }
-            }
-        }else {
-            String callback = update.getCallbackQuery().getData();
-            callback =callback.substring(0,callback.length()-3);
 
+        } else if (Keyboard.isCalledToAdd && !Keyboard.isCalledToRemoveFolder && !Keyboard.isCalledToRemoveArtifact) {
+            artifactRepository.nameOfFolder.put(update.getCallbackQuery().getFrom().getId(), update.getCallbackQuery().getData());
+            dialogService.sendMessage(update.getCallbackQuery().getMessage().getChatId(), "Що зберегти (файл, ссилка, фото...)");
+        } else if (!Keyboard.isCalledToAdd && Keyboard.isCalledToRemoveFolder && !Keyboard.isCalledToRemoveArtifact) {
+            artifactRepository.removeFolder(update.getCallbackQuery().getMessage().getChatId(), update.getCallbackQuery().getData());
+            dialogService.sendMessage(update.getCallbackQuery().getMessage().getChatId(),
+                    "Папку " + '"' + update.getCallbackQuery().getData() + '"' + " видалено");
+        } else if (!Keyboard.isCalledToAdd && !Keyboard.isCalledToRemoveFolder && Keyboard.isCalledToRemoveArtifact){
+           /* artifactRepository.removeArtifact(update,update.getCallbackQuery().getFrom().getId(),update.getCallbackQuery().getData());
+            dialogService.sendMessage(update.getCallbackQuery().getMessage().getChatId(), "Повідомлення видалено");*/
+            artifactRepository.nameOfFolder.put(update.getCallbackQuery().getFrom().getId(), update.getCallbackQuery().getData());
+            dialogService.forwardArtifacts(update);
         }
     }
-
-
-
 
 
 }

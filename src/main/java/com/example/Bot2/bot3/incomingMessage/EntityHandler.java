@@ -23,7 +23,11 @@ public class EntityHandler implements Handler {
         if (update.getMessage().getText().equals("/start")) {
             dialogService.sendKeyboard(update.getMessage().getChatId(), hello,
                     Keyboard.getMainMenu());
-        } else artifactRepository.saveArtifact(update, update.getMessage().getFrom().getId());
+        } else {
+            artifactRepository.saveArtifact(update, update.getMessage().getFrom().getId());
+            dialogService.sendMessage(update.getMessage().getChatId(),"Збережено");
+
+        }
 
     }
 }

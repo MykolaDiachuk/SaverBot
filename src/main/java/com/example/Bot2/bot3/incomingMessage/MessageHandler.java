@@ -35,8 +35,32 @@ public class MessageHandler implements Handler {
             case "Що зберегти (файл, ссилка, фото...)":
                 break;
             case "Додати до папки":
-                dialogService.sendKeyboard(update.getMessage().getChatId(), "Оберіть папку",
-                        Keyboard.getMenuToAdd(artifactRepository.folderNames.get(update.getMessage().getFrom().getId())));
+                if (!artifactRepository.folderNames.containsKey(update.getMessage().getFrom().getId())
+                        || artifactRepository.folderNames.get(update.getMessage().getFrom().getId()).isEmpty()) {
+                    dialogService.sendMessage(update.getMessage().getChatId(), "У вас немає папок");
+                } else {
+                    dialogService.sendKeyboard(update.getMessage().getChatId(), "Оберіть папку",
+                            Keyboard.getMenuToAdd(artifactRepository.folderNames.get(update.getMessage().getFrom().getId())));
+                }
+
+                break;
+            case "Видалити папку":
+                if (!artifactRepository.folderNames.containsKey(update.getMessage().getFrom().getId())
+                        || artifactRepository.folderNames.get(update.getMessage().getFrom().getId()).isEmpty()) {
+                    dialogService.sendMessage(update.getMessage().getChatId(), "У вас немає папок");
+                } else {
+                    dialogService.sendKeyboard(update.getMessage().getChatId(), "Оберіть папку для видалення",
+                            Keyboard.getMenuToRemoveFolder(artifactRepository.folderNames.get(update.getMessage().getFrom().getId())));
+                }
+                break;
+            case "Видалити повідомлення з папки":
+                if (!artifactRepository.folderNames.containsKey(update.getMessage().getFrom().getId())
+                        || artifactRepository.folderNames.get(update.getMessage().getFrom().getId()).isEmpty()) {
+                    dialogService.sendMessage(update.getMessage().getChatId(), "У вас немає папок");
+                } else {
+                    dialogService.sendKeyboard(update.getMessage().getChatId(), "Оберіть папку у для видалення повідомлення",
+                            Keyboard.getMenuToRemoveArtifact(artifactRepository.folderNames.get(update.getMessage().getFrom().getId())));
+                }
                 break;
             case "Знайти":
                 if (!artifactRepository.folderNames.containsKey(update.getMessage().getFrom().getId())

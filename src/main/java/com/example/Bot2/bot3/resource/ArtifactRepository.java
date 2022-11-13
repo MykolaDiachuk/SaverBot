@@ -19,7 +19,7 @@ public class ArtifactRepository {
     private final Map<Long, Map<String, Folder>> userFolders = new HashMap<>();
     public final Map<Long, List<String>> folderNames = new HashMap<>();
 
-    public final Map<Long,String> nameOfFolder = new HashMap<>();
+    public final Map<Long, String> nameOfFolder = new HashMap<>();
 
 
     public void createFolder(Long userId, Folder folder) {
@@ -42,14 +42,19 @@ public class ArtifactRepository {
 
         }
         userFolders.put(userId, folders);
-        nameOfFolder.put(userId,folder.getName());
+        nameOfFolder.put(userId, folder.getName());
     }
 
-    public void saveArtifact(Update update,Long userId) {
+    public Artifact createArtifact(Update update) {
         Artifact artifact = new Artifact();
         artifact.setChatId(update.getMessage().getChatId());
         artifact.setUserId(update.getMessage().getFrom().getId());
         artifact.setMessageId(update.getMessage().getMessageId());
+        return artifact;
+    }
+
+    public void saveArtifact(Update update, Long userId) {
+        Artifact artifact = createArtifact(update);
         Folder folder = getFolder(update.getMessage().getFrom().getId(), nameOfFolder.get(userId));
         if (folder.getArtifacts() == null) {
             List<Artifact> artifacts = new ArrayList<>();
@@ -60,23 +65,42 @@ public class ArtifactRepository {
     }
 
     public boolean isExist(String nameFolder, Long userId) {
-        if(folderNames.isEmpty()){
+        if (folderNames.isEmpty()) {
             return false;
-        }else if (folderNames.get(userId)==null){
+        } else if (folderNames.get(userId) == null) {
             return false;
-        }else return folderNames.get(userId).contains(nameFolder);
+        } else return folderNames.get(userId).contains(nameFolder);
     }
 
-    public Map<String, Folder> getFolders(Long userId) {
-        Map<String, Folder> folders = userFolders.get(userId);
-        if (folders == null) {
-            return new HashMap<>();
-        }
-        return folders;
-    }
 
     public Folder getFolder(Long userId, String nameOfFolder) {
-        return getFolders(userId).get(nameOfFolder);
+        Map<String, Folder> folders = userFolders.get(userId);
+        if (folders == null) {
+            folders = new HashMap<>();
+        }
+        return folders.get(nameOfFolder);
+    }
+
+    public void removeFolder(Long userId, String nameOfFolder) {
+        userFolders.get(userId).remove(nameOfFolder);
+        folderNames.get(userId).remove(nameOfFolder);
+    }
+
+    public Artifact findArtifact(List<Artifact> artifacts, Artifact artifact) {
+        Integer messageId = artifact.getMessageId();
+
+        for (Artifact art:artifacts) {
+            if(art.getMessageId().equals(messageId)){
+                return art;
+            }
+        }
+        return artifact;
+    }
+
+    public void removeArtifact(Update update, Long userId) {
+        Artifact artifact = createArtifact(update);
+        userFolders.get(userId).get(nameOfFolder.get(userId)).getArtifacts()
+                .remove(findArtifact(userFolders.get(userId).get(nameOfFolder.get(userId)).getArtifacts(),artifact));
     }
 
 
