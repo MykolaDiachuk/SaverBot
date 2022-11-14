@@ -13,7 +13,7 @@ public class EntityHandler implements Handler {
     DialogService dialogService;
     @Autowired
     ArtifactRepository artifactRepository;
-    private static final String hello = "Привіт, цей бот для зберігання інформації. Натисніть \"Зберегти до папки\", щоб створити папку та надішліть" +
+    private static final String HELLO = "Привіт, цей бот для зберігання інформації. Натисніть \"Зберегти до папки\", щоб створити папку та надішліть" +
             "одне чи декілька повідомлень для збереження. ВАЖЛИВО, повідомлення, які зберігаються до папки, не мають бути текстом. " +
             "Щоб знайти потрібну вам папку та  її вміст натисніть \"Знайти\" і виберіть папку.";
 
@@ -21,7 +21,7 @@ public class EntityHandler implements Handler {
     public void handle(Update update) {
 
         if (update.getMessage().getText().equals("/start")) {
-            dialogService.sendKeyboard(update.getMessage().getChatId(), hello,
+            dialogService.sendKeyboard(update.getMessage().getChatId(), HELLO,
                     Keyboard.getMainMenu());
         } else {
             artifactRepository.saveArtifact(update, update.getMessage().getFrom().getId());

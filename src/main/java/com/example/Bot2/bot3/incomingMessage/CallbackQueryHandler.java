@@ -25,23 +25,24 @@ public class CallbackQueryHandler implements Handler {
 
     @Override
     public void handle(Update update) {
+        String text = update.getCallbackQuery().getData();
+        Long chatId = update.getCallbackQuery().getMessage().getChatId();
+        Long userId = update.getCallbackQuery().getFrom().getId();
+
         if (!Keyboard.isCalledToAdd && !Keyboard.isCalledToRemoveFolder && !Keyboard.isCalledToRemoveArtifact) {
-            artifactRepository.nameOfFolder.put(update.getCallbackQuery().getFrom().getId(), update.getCallbackQuery().getData());
-            dialogService.forwardArtifacts(update);
-
-
+            artifactRepository.nameOfFolder.put(userId, text);
+            dialogService.forwardArtifacts(userId, chatId);
         } else if (Keyboard.isCalledToAdd && !Keyboard.isCalledToRemoveFolder && !Keyboard.isCalledToRemoveArtifact) {
-            artifactRepository.nameOfFolder.put(update.getCallbackQuery().getFrom().getId(), update.getCallbackQuery().getData());
-            dialogService.sendMessage(update.getCallbackQuery().getMessage().getChatId(), "Що зберегти (файл, ссилка, фото...)");
+            artifactRepository.nameOfFolder.put(userId,text);
+            dialogService.sendMessage(chatId, "Що зберегти (файл, ссилка, фото...)");
         } else if (!Keyboard.isCalledToAdd && Keyboard.isCalledToRemoveFolder && !Keyboard.isCalledToRemoveArtifact) {
-            artifactRepository.removeFolder(update.getCallbackQuery().getMessage().getChatId(), update.getCallbackQuery().getData());
-            dialogService.sendMessage(update.getCallbackQuery().getMessage().getChatId(),
-                    "Папку " + '"' + update.getCallbackQuery().getData() + '"' + " видалено");
+            artifactRepository.removeFolder(chatId, text);
+            dialogService.sendMessage(chatId, "Папку " + '"' + text + '"' + " видалено");
         } else if (!Keyboard.isCalledToAdd && !Keyboard.isCalledToRemoveFolder && Keyboard.isCalledToRemoveArtifact){
            /* artifactRepository.removeArtifact(update,update.getCallbackQuery().getFrom().getId(),update.getCallbackQuery().getData());
             dialogService.sendMessage(update.getCallbackQuery().getMessage().getChatId(), "Повідомлення видалено");*/
-            artifactRepository.nameOfFolder.put(update.getCallbackQuery().getFrom().getId(), update.getCallbackQuery().getData());
-            dialogService.forwardArtifacts(update);
+            artifactRepository.nameOfFolder.put(userId, text);
+            dialogService.forwardArtifacts(userId, chatId);
         }
     }
 

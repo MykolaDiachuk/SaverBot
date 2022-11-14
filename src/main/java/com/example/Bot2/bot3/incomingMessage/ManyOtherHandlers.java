@@ -16,8 +16,8 @@ public class ManyOtherHandlers implements Handler{
     @Override
     public void handle(Update update) {
         if (Keyboard.isCalledToRemoveArtifact){
-            artifactRepository.removeArtifact(update,update.getMessage().getFrom().getId());
-            dialogService.sendMessage(update.getMessage().getChatId(),"Видалено");
+           /* artifactRepository.removeArtifact(update,update.getMessage().getFrom().getId());
+            dialogService.sendMessage(update.getMessage().getChatId(),"Видалено")*/;
         }else {
             artifactRepository.saveArtifact(update,update.getMessage().getFrom().getId());
             dialogService.sendMessage(update.getMessage().getChatId(),"Збережено");

@@ -86,7 +86,7 @@ public class ArtifactRepository {
         folderNames.get(userId).remove(nameOfFolder);
     }
 
-    public Artifact findArtifact(List<Artifact> artifacts, Artifact artifact) {
+   /* public Artifact findArtifact(List<Artifact> artifacts, Artifact artifact) {
         Integer messageId = artifact.getMessageId();
 
         for (Artifact art:artifacts) {
@@ -95,13 +95,13 @@ public class ArtifactRepository {
             }
         }
         return artifact;
-    }
+    }*/
 
-    public void removeArtifact(Update update, Long userId) {
+  /*  public void removeArtifact(Update update, Long userId) {
         Artifact artifact = createArtifact(update);
         userFolders.get(userId).get(nameOfFolder.get(userId)).getArtifacts()
                 .remove(findArtifact(userFolders.get(userId).get(nameOfFolder.get(userId)).getArtifacts(),artifact));
-    }
+    }*/
 
 
 }

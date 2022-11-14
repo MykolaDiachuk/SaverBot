@@ -73,14 +73,14 @@ public class DialogService {
         }
     }
 
-    public void forwardArtifacts(Update update){
-        Folder folder = artifactRepository.getFolder(update.getCallbackQuery().getFrom().getId(),
-                artifactRepository.nameOfFolder.get(update.getCallbackQuery().getFrom().getId()));
+    public void forwardArtifacts( Long userId, Long chatId){
+        Folder folder = artifactRepository.getFolder(userId,
+                artifactRepository.nameOfFolder.get(userId));
         if (folder.getArtifacts() == null) {
-            sendMessage(update.getCallbackQuery().getMessage().getChatId(), "Папка пуста");
+            sendMessage(chatId, "Папка пуста");
         } else {
-            sendMessage(update.getCallbackQuery().getMessage().getChatId(),
-                    "Вміст папки " + '"' + artifactRepository.nameOfFolder.get(update.getCallbackQuery().getFrom().getId()) + '"');
+            sendMessage(chatId,
+                    "Вміст папки " + '"' + artifactRepository.nameOfFolder.get(userId) + '"');
             List<Artifact> artifacts = folder.getArtifacts();
             for (Artifact artifact : artifacts) {
                 forwardMessage(artifact.getChatId(), artifact.getChatId(), artifact.getMessageId());
