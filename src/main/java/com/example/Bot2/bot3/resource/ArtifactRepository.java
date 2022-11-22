@@ -2,8 +2,9 @@ package com.example.Bot2.bot3.resource;
 
 import com.example.Bot2.bot3.models.Artifact;
 import com.example.Bot2.bot3.models.Folder;
-import com.google.common.collect.Lists;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -14,6 +15,9 @@ import java.util.Map;
 
 @Component
 public class ArtifactRepository {
+    @Autowired
+    @Lazy
+    DialogService dialogService;
 
 
     private final Map<Long, Map<String, Folder>> userFolders = new HashMap<>();
@@ -53,23 +57,33 @@ public class ArtifactRepository {
         return artifact;
     }
 
-    public void saveArtifact(Update update, Long userId) {
+    public boolean saveArtifact(Update update, Long userId) {
         Artifact artifact = createArtifact(update);
         Folder folder = getFolder(update.getMessage().getFrom().getId(), nameOfFolder.get(userId));
-        if (folder.getArtifacts() == null) {
-            List<Artifact> artifacts = new ArrayList<>();
-            artifacts.add(artifact);
-            folder.setArtifacts(artifacts);
-        } else folder.getArtifacts().add(artifact);
-        createFolder(update.getMessage().getFrom().getId(), folder);
+        if (folder == null) {
+            dialogService.sendMessage(artifact.getChatId(), "Назву папки не вказано");
+        } else {
+            if (folder.getArtifacts() == null) {
+                List<Artifact> artifacts = new ArrayList<>();
+                artifacts.add(artifact);
+                folder.setArtifacts(artifacts);
+            } else{
+                folder.getArtifacts().add(artifact);
+            }
+            createFolder(update.getMessage().getFrom().getId(), folder);
+            return true;
+        }
+        return false;
     }
+
+
 
     public boolean isExist(String nameFolder, Long userId) {
         if (folderNames.isEmpty()) {
             return false;
         } else if (folderNames.get(userId) == null) {
             return false;
-        } else return folderNames.get(userId).contains(nameFolder);
+        }else return folderNames.get(userId).contains(nameFolder);
     }
 
 
@@ -86,22 +100,13 @@ public class ArtifactRepository {
         folderNames.get(userId).remove(nameOfFolder);
     }
 
-   /* public Artifact findArtifact(List<Artifact> artifacts, Artifact artifact) {
-        Integer messageId = artifact.getMessageId();
 
-        for (Artifact art:artifacts) {
-            if(art.getMessageId().equals(messageId)){
-                return art;
-            }
-        }
-        return artifact;
-    }*/
+    public void removeArtifact(Long userId, int i) {
+        Artifact artifact = getFolder(userId,nameOfFolder.get(userId)).getArtifacts().get(i);
+        dialogService.sendMessage(artifact.getChatId(),"Видалено" + Emojis.DUMP.get());
+        userFolders.get(userId).get(nameOfFolder.get(userId)).getArtifacts().remove(artifact);
 
-  /*  public void removeArtifact(Update update, Long userId) {
-        Artifact artifact = createArtifact(update);
-        userFolders.get(userId).get(nameOfFolder.get(userId)).getArtifacts()
-                .remove(findArtifact(userFolders.get(userId).get(nameOfFolder.get(userId)).getArtifacts(),artifact));
-    }*/
+    }
 
 
 }

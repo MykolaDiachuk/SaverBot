@@ -6,22 +6,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class DialogService {
 
 
+    private final Keyboard keyboard;
     private final TelegramBotResource telegramBotResource;
     private final ArtifactRepository artifactRepository;
 
+
     @Autowired
-    public DialogService(TelegramBotResource telegramBotResource, ArtifactRepository artifactRepository) {
+    public DialogService(Keyboard keyboard, TelegramBotResource telegramBotResource, ArtifactRepository artifactRepository) {
+        this.keyboard = keyboard;
         this.telegramBotResource = telegramBotResource;
         this.artifactRepository = artifactRepository;
     }
@@ -58,7 +61,8 @@ public class DialogService {
         sendMessage.setReplyMarkup(replyKeyboardMarkup);
         try {
             telegramBotResource.execute(sendMessage);
-        } catch (TelegramApiException ignored) {
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -69,14 +73,19 @@ public class DialogService {
         sendMessage.setReplyMarkup(inlineKeyboardMarkup);
         try {
             telegramBotResource.execute(sendMessage);
-        } catch (TelegramApiException ignored) {
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public void forwardArtifacts( Long userId, Long chatId){
+    public void forwardArtifacts(Long userId, Long chatId) {
         Folder folder = artifactRepository.getFolder(userId,
                 artifactRepository.nameOfFolder.get(userId));
         if (folder.getArtifacts() == null) {
+            List<Artifact> artifacts = new ArrayList<>();
+            folder.setArtifacts(artifacts);
+        }
+        if (folder.getArtifacts().isEmpty()) {
             sendMessage(chatId, "Папка пуста");
         } else {
             sendMessage(chatId,
@@ -86,6 +95,34 @@ public class DialogService {
                 forwardMessage(artifact.getChatId(), artifact.getChatId(), artifact.getMessageId());
             }
         }
+    }
+
+
+    public void sendKeyboardArtifact(Long chatId, String text, Long userId) {
+        Folder folder = artifactRepository.getFolder(userId,
+                artifactRepository.nameOfFolder.get(userId));
+        if (folder.getArtifacts() == null) {
+            sendMessage(chatId, "Папка пуста");
+        } else {
+            List<Artifact> artifacts = folder.getArtifacts();
+
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(chatId);
+            sendMessage.setText(text);
+
+            int i = 0;
+
+            for (Artifact artifact : artifacts) {
+                sendMessage.setReplyMarkup(keyboard.removeThisArtifact(i, artifact));
+                i++;
+                try {
+                    telegramBotResource.execute(sendMessage);
+                } catch (TelegramApiException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
     }
 
 

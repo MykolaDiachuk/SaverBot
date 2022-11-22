@@ -2,6 +2,7 @@ package com.example.Bot2.bot3.incomingMessage;
 
 import com.example.Bot2.bot3.resource.ArtifactRepository;
 import com.example.Bot2.bot3.resource.DialogService;
+import com.example.Bot2.bot3.resource.Emojis;
 import com.example.Bot2.bot3.resource.Keyboard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -9,13 +10,18 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component
 public class EntityHandler implements Handler {
+    private final ArtifactRepository artifactRepository;
+    private final DialogService dialogService;
+
     @Autowired
-    DialogService dialogService;
-    @Autowired
-    ArtifactRepository artifactRepository;
-    private static final String HELLO = "Привіт, цей бот для зберігання інформації. Натисніть \"Зберегти до папки\", щоб створити папку та надішліть" +
-            "одне чи декілька повідомлень для збереження. ВАЖЛИВО, повідомлення, які зберігаються до папки, не мають бути текстом. " +
-            "Щоб знайти потрібну вам папку та  її вміст натисніть \"Знайти\" і виберіть папку.";
+    public EntityHandler(ArtifactRepository artifactRepository, DialogService dialogService) {
+        this.artifactRepository = artifactRepository;
+        this.dialogService = dialogService;
+    }
+
+    private static final String HELLO = "Привіт" + Emojis.WAVE.get() + ", цей бот для зберігання інформації. Натисніть \"Зберегти\", щоб створити папку та надішліть" +
+            "одне чи декілька повідомлень для збереження. ВАЖЛИВО, повідомлення, які зберігаються до папки, не мають бути текстом. ";
+
 
     @Override
     public void handle(Update update) {
@@ -24,9 +30,9 @@ public class EntityHandler implements Handler {
             dialogService.sendKeyboard(update.getMessage().getChatId(), HELLO,
                     Keyboard.getMainMenu());
         } else {
-            artifactRepository.saveArtifact(update, update.getMessage().getFrom().getId());
-            dialogService.sendMessage(update.getMessage().getChatId(),"Збережено");
-
+            if (artifactRepository.saveArtifact(update, update.getMessage().getFrom().getId()))
+                dialogService.sendMessage(update.getMessage().getChatId(), "Збережено " + Emojis.SAVE.get());
+            MessageHandler.isTextSave = false;
         }
 
     }

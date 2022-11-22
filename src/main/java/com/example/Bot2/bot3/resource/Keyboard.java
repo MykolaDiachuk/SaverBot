@@ -1,7 +1,9 @@
 package com.example.Bot2.bot3.resource;
 
+import com.example.Bot2.bot3.models.Artifact;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -10,19 +12,18 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class Keyboard {
-    @Autowired
-    private static DialogService dialogService;
 
     //головна клавіатура
     public static ReplyKeyboardMarkup getMainMenu() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         KeyboardRow row1 = new KeyboardRow();
+        row1.add("Зберегти");
         row1.add("Зберегти до папки");
-        row1.add("Додати до папки");
         KeyboardRow row2 = new KeyboardRow();
         row2.add("Видалити папку");
-        row2.add("Видалити повідомлення з папки");
+        row2.add("Видалити повідомлення");
         KeyboardRow row3 = new KeyboardRow();
         row3.add("Знайти");
         List<KeyboardRow> rows = new ArrayList<>();
@@ -30,14 +31,18 @@ public class Keyboard {
         rows.add(row2);
         rows.add(row3);
         replyKeyboardMarkup.setKeyboard(rows);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
         return replyKeyboardMarkup;
     }
 
-    static List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-    static InlineKeyboardButton inlineKeyboardButton;
+    private static List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+    private static InlineKeyboardButton inlineKeyboardButton;
     public static boolean isCalledToAdd = false;
     public static boolean isCalledToRemoveFolder = false;
     public static boolean isCalledToRemoveArtifact = false;
+
+    public static boolean isCalledRemoveThisArtifact = true;
 
     public static InlineKeyboardMarkup getFolderMenu(List<String> folderNames) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
@@ -52,11 +57,13 @@ public class Keyboard {
         }
 
         inlineKeyboardMarkup.setKeyboard(rowList);
+
         inlineKeyboardButton = new InlineKeyboardButton();
         rowList = new ArrayList<>();
         isCalledToAdd = false;
         isCalledToRemoveFolder = false;
-        isCalledToRemoveArtifact =false;
+        isCalledToRemoveArtifact = false;
+        isCalledRemoveThisArtifact = false;
         return inlineKeyboardMarkup;
     }
 
@@ -73,11 +80,13 @@ public class Keyboard {
         }
 
         inlineKeyboardMarkup.setKeyboard(rowList);
+
         inlineKeyboardButton = new InlineKeyboardButton();
         rowList = new ArrayList<>();
         isCalledToAdd = true;
         isCalledToRemoveFolder = false;
         isCalledToRemoveArtifact = false;
+        isCalledRemoveThisArtifact = false;
         return inlineKeyboardMarkup;
     }
 
@@ -94,12 +103,14 @@ public class Keyboard {
         }
 
         inlineKeyboardMarkup.setKeyboard(rowList);
+
         inlineKeyboardButton = new InlineKeyboardButton();
         rowList = new ArrayList<>();
 
         isCalledToAdd = false;
         isCalledToRemoveFolder = true;
         isCalledToRemoveArtifact = false;
+        isCalledRemoveThisArtifact = false;
 
         return inlineKeyboardMarkup;
     }
@@ -117,12 +128,37 @@ public class Keyboard {
         }
 
         inlineKeyboardMarkup.setKeyboard(rowList);
+
         inlineKeyboardButton = new InlineKeyboardButton();
         rowList = new ArrayList<>();
 
         isCalledToAdd = false;
         isCalledToRemoveFolder = false;
         isCalledToRemoveArtifact = true;
+        isCalledRemoveThisArtifact = false;
+
+        return inlineKeyboardMarkup;
+    }
+
+
+    @Autowired
+    @Lazy
+    DialogService dialogService;
+
+    public InlineKeyboardMarkup removeThisArtifact(int i, Artifact artifact) {
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+
+        dialogService.forwardMessage(artifact.getChatId(), artifact.getChatId(), artifact.getMessageId());
+
+        inlineKeyboardButton.setText("Видалити");
+        inlineKeyboardButton.setCallbackData(String.valueOf(i));
+        List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
+        keyboardButtonsRow1.add(inlineKeyboardButton);
+        rowList.add(keyboardButtonsRow1);
+
+        inlineKeyboardMarkup.setKeyboard(rowList);
 
         return inlineKeyboardMarkup;
     }

@@ -26,7 +26,8 @@ public class TelegramBotResource extends TelegramLongPollingBot {
 
     @Autowired
     @Lazy
-    public TelegramBotResource(BotConfig botConfig, MessageHandler messageHandler, EntityHandler entityHandler, CallbackQueryHandler callbackQueryHandler,  ManyOtherHandlers manyOtherHandlers) {
+    public TelegramBotResource(BotConfig botConfig, MessageHandler messageHandler, EntityHandler entityHandler,
+                               CallbackQueryHandler callbackQueryHandler,  ManyOtherHandlers manyOtherHandlers) {
         this.botConfig = botConfig;
         this.messageHandler = messageHandler;
         this.entityHandler = entityHandler;
