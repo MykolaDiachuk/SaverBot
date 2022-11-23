@@ -19,11 +19,11 @@ public class Keyboard {
     public static ReplyKeyboardMarkup getMainMenu() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         KeyboardRow row1 = new KeyboardRow();
-        row1.add("Зберегти");
+        row1.add("Зберегти повідомлення");
         row1.add("Зберегти до папки");
         KeyboardRow row2 = new KeyboardRow();
-        row2.add("Видалити папку");
         row2.add("Видалити повідомлення");
+        row2.add("Видалити папку");
         KeyboardRow row3 = new KeyboardRow();
         row3.add("Знайти");
         List<KeyboardRow> rows = new ArrayList<>();

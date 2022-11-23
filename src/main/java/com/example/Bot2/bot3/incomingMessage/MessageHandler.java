@@ -34,7 +34,7 @@ public class MessageHandler implements Handler {
 
 
         switch (text) {
-            case "Зберегти":
+            case "Зберегти повідомлення":
                 dialogService.sendMessage(chatId, "Назва папки в яку зберегти:");
                 break;
             case "Що зберегти (файл, ссилка, фото...)":
