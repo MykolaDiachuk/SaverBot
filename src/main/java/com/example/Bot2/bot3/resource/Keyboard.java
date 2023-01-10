@@ -120,7 +120,7 @@ public class Keyboard {
 
         for (int i = rowList.size(); i < folderNames.size(); i++) {
             inlineKeyboardButton = new InlineKeyboardButton();
-            inlineKeyboardButton.setText("Видалити з папки " + '"' + folderNames.get(i) + '"');
+            inlineKeyboardButton.setText("Видалити з " + '"' + folderNames.get(i) + '"');
             inlineKeyboardButton.setCallbackData(folderNames.get(i));
             List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
             keyboardButtonsRow1.add(inlineKeyboardButton);
@@ -145,7 +145,7 @@ public class Keyboard {
     @Lazy
     DialogService dialogService;
 
-    public InlineKeyboardMarkup removeThisArtifact(int i, Artifact artifact) {
+    public InlineKeyboardMarkup removeThisArtifact( Artifact artifact) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
@@ -153,7 +153,7 @@ public class Keyboard {
         dialogService.forwardMessage(artifact.getChatId(), artifact.getChatId(), artifact.getMessageId());
 
         inlineKeyboardButton.setText("Видалити");
-        inlineKeyboardButton.setCallbackData(String.valueOf(i));
+        inlineKeyboardButton.setCallbackData(String.valueOf(artifact.getMessageId()));
         List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
         keyboardButtonsRow1.add(inlineKeyboardButton);
         rowList.add(keyboardButtonsRow1);

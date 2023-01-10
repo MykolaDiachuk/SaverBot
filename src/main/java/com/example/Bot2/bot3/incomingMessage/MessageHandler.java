@@ -1,12 +1,14 @@
 package com.example.Bot2.bot3.incomingMessage;
 
+import com.example.Bot2.Config.Const;
+import com.example.Bot2.Config.DBHandler;
 import com.example.Bot2.bot3.models.Folder;
 import com.example.Bot2.bot3.resource.ArtifactRepository;
 import com.example.Bot2.bot3.resource.DialogService;
 import com.example.Bot2.bot3.resource.Emojis;
 import com.example.Bot2.bot3.resource.Keyboard;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -17,6 +19,7 @@ public class MessageHandler implements Handler {
 
     private final ArtifactRepository artifactRepository;
 
+
     public static boolean isTextSave = false;
 
     @Autowired
@@ -26,31 +29,36 @@ public class MessageHandler implements Handler {
     }
 
 
+    @SneakyThrows
     @Override
     public void handle(Update update) {
         String text = update.getMessage().getText();
         Long chatId = update.getMessage().getChatId();
         Long userId = update.getMessage().getFrom().getId();
 
+        DBHandler dbHandler = new DBHandler();
+
 
         switch (text) {
             case "Зберегти повідомлення":
-                dialogService.sendMessage(chatId, "Назва папки в яку зберегти:");
+                dialogService.sendMessage(chatId, "Введіть назву папки:");
                 break;
-            case "Що зберегти (файл, ссилка, фото...)":
+            case Const.TO_SEND:
                 break;
             case "Зберегти до папки":
-                if (!artifactRepository.folderNames.containsKey(userId)
-                        || artifactRepository.folderNames.get(userId).isEmpty()) {
+                if ((!artifactRepository.folderNames.containsKey(userId)
+                        || artifactRepository.folderNames.get(userId).isEmpty()) &&
+                        dbHandler.selectFoldersNames(userId).isEmpty()) {
                     dialogService.sendMessage(chatId, "У вас немає папок");
                 } else {
                     dialogService.sendKeyboard(chatId, "Оберіть папку",
-                            Keyboard.getMenuToAdd(artifactRepository.folderNames.get(userId)));
+                            Keyboard.getMenuToAdd(dbHandler.selectFoldersNames(userId)));
                 }
                 break;
             case "Видалити папку":
-                if (!artifactRepository.folderNames.containsKey(userId)
-                        || artifactRepository.folderNames.get(userId).isEmpty()) {
+                if ((!artifactRepository.folderNames.containsKey(userId)
+                        || artifactRepository.folderNames.get(userId).isEmpty()) &&
+                        dbHandler.selectFoldersNames(userId).isEmpty()) {
                     dialogService.sendMessage(chatId, "У вас немає папок");
                 } else {
                     dialogService.sendKeyboard(chatId, "Оберіть папку для видалення",
@@ -58,23 +66,27 @@ public class MessageHandler implements Handler {
                 }
                 break;
             case "Видалити повідомлення":
-                if (!artifactRepository.folderNames.containsKey(userId)
-                        || artifactRepository.folderNames.get(userId).isEmpty()) {
+                if ((!artifactRepository.folderNames.containsKey(userId)
+                        || artifactRepository.folderNames.get(userId).isEmpty()) &&
+                        dbHandler.selectFoldersNames(userId).isEmpty()) {
                     dialogService.sendMessage(chatId, "У вас немає папок");
                 } else {
-                    dialogService.sendKeyboard(chatId, "Оберіть папку у для видалення повідомлення",
+                    dialogService.sendKeyboard(chatId, "Оберіть папку для видалення повідомлення",
                             Keyboard.getMenuToRemoveArtifact(artifactRepository.folderNames.get(userId)));
                 }
                 break;
             case "Знайти":
-                if (!artifactRepository.folderNames.containsKey(userId)
-                        || artifactRepository.folderNames.get(userId).isEmpty()) {
+                if ((!artifactRepository.folderNames.containsKey(userId)
+                        || artifactRepository.folderNames.get(userId).isEmpty()) &&
+                        dbHandler.selectFoldersNames(userId).isEmpty()) {
                     dialogService.sendMessage(chatId, "У вас немає папок");
-                } else dialogService.sendKeyboard(chatId, "Ваші папки",
-                        Keyboard.getFolderMenu(artifactRepository.folderNames.get(userId)));
+                } else {
+                    dialogService.sendKeyboard(chatId, "Ваші папки",
+                            Keyboard.getFolderMenu(artifactRepository.folderNames.get(userId)));
+                }
                 break;
             default:
-                if (!isTextSave){
+                if (!isTextSave) {
                     Folder folder;
                     if (artifactRepository.isExist(text, userId)) {
                         folder = artifactRepository.getFolder(userId, text);
@@ -83,8 +95,8 @@ public class MessageHandler implements Handler {
                         folder.setName(text);
                         folder.setUserId(userId);
                     }
-                    artifactRepository.nameOfFolder.put(userId,text);
-                    dialogService.sendMessage(chatId, "Що зберегти (файл, ссилка, фото...)");
+                    artifactRepository.nameOfFolder.put(userId, text);
+                    dialogService.sendMessage(chatId, Const.TO_SEND);
                     artifactRepository.createFolder(userId, folder);
                     isTextSave = true;
                 } else {

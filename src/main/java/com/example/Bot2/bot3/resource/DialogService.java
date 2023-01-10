@@ -110,11 +110,8 @@ public class DialogService {
             sendMessage.setChatId(chatId);
             sendMessage.setText(text);
 
-            int i = 0;
-
             for (Artifact artifact : artifacts) {
-                sendMessage.setReplyMarkup(keyboard.removeThisArtifact(i, artifact));
-                i++;
+                sendMessage.setReplyMarkup(keyboard.removeThisArtifact(artifact));
                 try {
                     telegramBotResource.execute(sendMessage);
                 } catch (TelegramApiException e) {

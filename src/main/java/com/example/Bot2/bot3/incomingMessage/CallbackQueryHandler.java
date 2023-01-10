@@ -1,6 +1,7 @@
 package com.example.Bot2.bot3.incomingMessage;
 
 
+import com.example.Bot2.Config.Const;
 import com.example.Bot2.bot3.resource.ArtifactRepository;
 import com.example.Bot2.bot3.resource.DialogService;
 import com.example.Bot2.bot3.resource.Emojis;
@@ -35,11 +36,11 @@ public class CallbackQueryHandler implements Handler {
             dialogService.forwardArtifacts(userId, chatId);
         } else if (Keyboard.isCalledToAdd && !Keyboard.isCalledToRemoveFolder && !Keyboard.isCalledToRemoveArtifact) {
             artifactRepository.nameOfFolder.put(userId, text);
-            dialogService.sendMessage(chatId, "Що зберегти (файл, ссилка, фото...)");
+            dialogService.sendMessage(chatId, Const.TO_SEND);
         } else if (!Keyboard.isCalledToAdd && Keyboard.isCalledToRemoveFolder && !Keyboard.isCalledToRemoveArtifact) {
             artifactRepository.removeFolder(chatId, text);
             dialogService.sendMessage(chatId, "Папку " + '"' + text + '"' + " видалено " + Emojis.DUMP.get());
-        } else if (!Keyboard.isCalledToAdd && !Keyboard.isCalledToRemoveFolder) {
+        } else {
             artifactRepository.nameOfFolder.put(userId, text);
             dialogService.sendKeyboardArtifact(chatId, Emojis.UP.get(), userId);
             Keyboard.isCalledRemoveThisArtifact = true;

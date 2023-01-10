@@ -45,7 +45,6 @@ public class TelegramBotResource extends TelegramLongPollingBot {
     public String getBotToken() {
         return botConfig.getToken();
     }
-
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage()) {
