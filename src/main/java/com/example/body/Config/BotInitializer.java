@@ -1,4 +1,4 @@
-package com.example.Bot2.Config;
+package com.example.body.Config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;

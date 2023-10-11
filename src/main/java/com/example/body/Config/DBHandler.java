@@ -1,4 +1,4 @@
-package com.example.Bot2.Config;
+package com.example.body.Config;
 
 
 

@@ -1,4 +1,4 @@
-package com.example.Bot2.Config;
+package com.example.body.Config;
 
 public class Const {
     public static final String TABLE = "folders";

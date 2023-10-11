@@ -1,8 +1,8 @@
-package com.example.Bot2.bot3.incomingMessage;
+package com.example.body.botlogic.incomingMessage;
 
-import com.example.Bot2.bot3.resource.ArtifactRepository;
-import com.example.Bot2.bot3.resource.DialogService;
-import com.example.Bot2.bot3.resource.Emojis;
+import com.example.body.botlogic.resource.ArtifactRepository;
+import com.example.body.botlogic.resource.DialogService;
+import com.example.body.botlogic.resource.Emojis;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

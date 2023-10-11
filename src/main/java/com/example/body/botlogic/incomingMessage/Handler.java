@@ -1,4 +1,4 @@
-package com.example.Bot2.bot3.incomingMessage;
+package com.example.body.botlogic.incomingMessage;
 
 import org.telegram.telegrambots.meta.api.objects.Update;
 

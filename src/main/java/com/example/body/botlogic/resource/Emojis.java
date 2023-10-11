@@ -1,4 +1,4 @@
-package com.example.Bot2.bot3.resource;
+package com.example.body.botlogic.resource;
 
 
 import com.vdurmont.emoji.EmojiParser;

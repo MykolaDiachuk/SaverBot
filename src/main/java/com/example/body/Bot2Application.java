@@ -1,6 +1,6 @@
-package com.example.Bot2;
+package com.example.body;
 
-import com.example.Bot2.Config.DBHandler;
+import com.example.body.Config.DBHandler;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

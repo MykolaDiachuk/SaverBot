@@ -1,6 +1,6 @@
-package com.example.Bot2.bot3.resource;
+package com.example.body.botlogic.resource;
 
-import com.example.Bot2.bot3.models.Artifact;
+import com.example.body.botlogic.models.Artifact;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
